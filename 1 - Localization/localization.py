@@ -72,3 +72,129 @@ measurements = ['G','G','G','G','G']
 motions = [[0,0],[0,1],[1,0],[1,0],[0,1]]
 p = localize(colors,measurements,motions,sensor_right = 0.7, p_move = 0.8)
 show(p) # displays your answer
+
+# test 1
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'G'],
+          ['G', 'G', 'G']]
+measurements = ['R']
+motions = [[0,0]]
+sensor_right = 1.0
+p_move = 1.0
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.0, 0.0, 0.0],
+     [0.0, 1.0, 0.0],
+     [0.0, 0.0, 0.0]])
+print "Test 1:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 2
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R']
+motions = [[0,0]]
+sensor_right = 1.0
+p_move = 1.0
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.0, 0.0, 0.0],
+     [0.0, 0.5, 0.5],
+     [0.0, 0.0, 0.0]])
+print "Test 2:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 3
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R']
+motions = [[0,0]]
+sensor_right = 0.8
+p_move = 1.0
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.06666666666, 0.06666666666, 0.06666666666],
+     [0.06666666666, 0.26666666666, 0.26666666666],
+     [0.06666666666, 0.06666666666, 0.06666666666]])
+print "Test 3:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 4
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R', 'R']
+motions = [[0,0], [0,1]]
+sensor_right = 0.8
+p_move = 1.0
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.03333333333, 0.03333333333, 0.03333333333],
+     [0.13333333333, 0.13333333333, 0.53333333333],
+     [0.03333333333, 0.03333333333, 0.03333333333]])
+print "Test 4:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 5
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R', 'R']
+motions = [[0,0], [0,1]]
+sensor_right = 1.0
+p_move = 1.0
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.0, 0.0, 0.0],
+     [0.0, 0.0, 1.0],
+     [0.0, 0.0, 0.0]])
+print "Test 5:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 6
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R', 'R']
+motions = [[0,0], [0,1]]
+sensor_right = 0.8
+p_move = 0.5
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.0289855072, 0.0289855072, 0.0289855072],
+     [0.0724637681, 0.2898550724, 0.4637681159],
+     [0.0289855072, 0.0289855072, 0.0289855072]])
+print "Test 6:"
+show(p)
+show(correct_answer)
+print "\n"
+
+# test 7
+colors = [['G', 'G', 'G'],
+          ['G', 'R', 'R'],
+          ['G', 'G', 'G']]
+measurements = ['R', 'R']
+motions = [[0,0], [0,1]]
+sensor_right = 1.0
+p_move = 0.5
+p = localize(colors,measurements,motions,sensor_right,p_move)
+correct_answer = (
+    [[0.0, 0.0, 0.0],
+     [0.0, 0.33333333, 0.66666666],
+     [0.0, 0.0, 0.0]])
+print "Test 7:"
+show(p)
+show(correct_answer)
+print "\n"
