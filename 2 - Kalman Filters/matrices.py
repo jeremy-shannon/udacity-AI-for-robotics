@@ -142,9 +142,9 @@ class matrix:
 
 def kalman_filter(x, P):
     for n in range(len(measurements)):
-        x = x.transpose()
-        P = P.transpose()
+        
         # measurement update
+        
 
         # prediction
         
@@ -168,3 +168,4 @@ print kalman_filter(x, P)
 # output should be:
 # x: [[3.9996664447958645], [0.9999998335552873]]
 # P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
+                                                            
