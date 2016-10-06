@@ -2,3 +2,4 @@
 My solutions to some quizzes, exercises, and projects in the Udacity Artificial Intelligence for Robotics course
 
 1. Localization
+2. Kalman Filters
