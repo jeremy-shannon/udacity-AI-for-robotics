@@ -138,7 +138,7 @@ for i in range(N):
         if seek < currentSum:
             p3.append(p[j])
             break
+p3.sort()
 p = p3
-print p
 
 
