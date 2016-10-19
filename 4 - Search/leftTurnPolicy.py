@@ -58,5 +58,54 @@ cost = [2, 1, 20] # cost has 3 values, corresponding to making
 # ----------------------------------------
 
 def optimum_policy2D(grid,init,goal,cost):
+    value = [[[999 for facing in range(len(forward))]\
+        for col in range(len(grid[0]))]\
+        for row in range(len(grid))]
+    policy = [[[' ' for facing in range(len(forward))]\
+        for col in range(len(grid[0]))]\
+        for row in range(len(grid))]
+    change = True
+    
+    while change:
+        change = False
+        
+        for y in range(len(grid)):
+            for x in range(len(grid[0])):
+                for f in range(len(forward)):
+                    if x == goal[1] and y == goal[0]:
+                        if value[y][x][f] > 0:
+                            value[y][x][f] = 0
+                            policy[y][x][f] = '*'
+                            change = True
+                    elif grid[y][x] == 0:
+                        for f2 in range(len(forward)):
+                            x2 = x + forward[f2][1]
+                            y2 = y + forward[f2][0]
+                            if x2 >= 0 and x2 < len(grid[0]) and y2 >= 0 and y2 < len(grid) and grid[y2][x2] == 0:
+                                targetVal = value[y2][x2][f2]
+                                for a in range(len(action)):
+                                    if (f + action[a]) % len(forward) == f2:
+                                        v2 = targetVal + cost[a]
+                                        if v2 < value[y][x][f]:
+                                            value[y][x][f] = v2
+                                            policy[y][x][f] = action_name[a]
+                                            change = True
+                                    
+    policy2D = [[' ' for x in range(len(grid[0]))] for y in range(len(grid))]
+    x = init[1]
+    y = init[0]
+    f = init[2]
+    policy2D[y][x] = policy[y][x][f]
 
+    while policy[y][x][f] != '*':
+        if policy[y][x][f] == 'R':
+            f = (f - 1) % 4
+        elif policy[y][x][f] == 'L':
+            f = (f + 1) % 4
+        x += forward[f][1]
+        y += forward[f][0]
+        policy2D[y][x] = policy[y][x][f]
     return policy2D
+
+for line in optimum_policy2D(grid,init,goal,cost):
+    print line
