@@ -38,7 +38,57 @@ def stochastic_value(grid,goal,cost_step,collision_cost,success_prob):
     failure_prob = (1.0 - success_prob)/2.0 # Probability(stepping left) = prob(stepping right) = failure_prob
     value = [[collision_cost for col in range(len(grid[0]))] for row in range(len(grid))]
     policy = [[' ' for col in range(len(grid[0]))] for row in range(len(grid))]
+    change = True
+
+    while change:
+        change = False
+
+        for x in range(len(grid)):
+            for y in range(len(grid[0])):
+                if goal[0] == x and goal[1] == y:
+                    if value[x][y] > 0:
+                        value[x][y] = 0.
+
+                        change = True
+
+                elif grid[x][y] == 0:
+                    for a in range(len(delta)):
+                        totalCost = 0.
+                        for b in [-1,0,1]:
+                            x2 = x + delta[(a+b)%4][0]
+                            y2 = y + delta[(a+b)%4][1]
+                            prob = 0.
+                            if b == 0:
+                                prob = success_prob
+                            else:
+                                prob = failure_prob
+                            if x2 >= 0 and x2 < len(grid) and y2 >= 0 and y2 < len(grid[0]) and grid[x2][y2] == 0:
+                                totalCost += value[x2][y2] * prob
+                            else:
+                                totalCost += collision_cost * prob
+                        totalCost += cost_step    
+                        if totalCost < value[x][y]:
+                            change = True
+                            value[x][y] = totalCost
     
+    for x in range(len(grid[0])):
+        for y in range(len(grid)):
+            if value[y][x] == 99:
+                continue
+            if value[y][x] == 0:
+                policy[y][x] = '*'
+                continue
+            surroundingCells = [99,99,99,99]
+            for i in range(len(delta)):
+                x2 = x + delta[i][1]
+                y2 = y + delta[i][0]
+                if x2 >= 0 and x2 < len(grid[0]) and y2 >= 0 and y2 < len(grid):
+                    surroundingCells[i] = value[y2][x2]
+            minVal = min(surroundingCells)
+            for j in range(len(surroundingCells)):
+                if surroundingCells[j] == minVal and minVal != 99:
+                    policy[y][x] = delta_name[j]
+
     return value, policy
 
 # ---------------------------------------------
@@ -51,7 +101,7 @@ grid = [[0, 0, 0, 0],
         [0, 1, 1, 0]]
 goal = [0, len(grid[0])-1] # Goal is in top right corner
 cost_step = 1
-collision_cost = 100
+collision_cost = 100.
 success_prob = 0.5
 
 value,policy = stochastic_value(grid,goal,cost_step,collision_cost,success_prob)
