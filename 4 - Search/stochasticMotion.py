@@ -48,7 +48,7 @@ def stochastic_value(grid,goal,cost_step,collision_cost,success_prob):
                 if goal[0] == x and goal[1] == y:
                     if value[x][y] > 0:
                         value[x][y] = 0.
-
+                        policy[x][y] = '*'
                         change = True
 
                 elif grid[x][y] == 0:
@@ -103,7 +103,7 @@ grid = [[0, 0, 0, 0],
 goal = [0, len(grid[0])-1] # Goal is in top right corner
 cost_step = 1
 collision_cost = 100.
-success_prob = 0.5
+success_prob = 0.68
 
 value,policy = stochastic_value(grid,goal,cost_step,collision_cost,success_prob)
 for row in value:
