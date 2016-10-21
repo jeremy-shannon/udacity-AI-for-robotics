@@ -41,7 +41,18 @@ def smooth(path, weight_data = 0.5, weight_smooth = 0.1, tolerance = 0.000001):
     #######################
     ### ENTER CODE HERE ###
     #######################
-    
+    while True:
+        totalChange = 0.
+        for i in range(len(path)):
+            if i != 0 and i != (len(path) - 1):
+                for dim in range(len(path[i])):
+                    oldVal = newpath[i][dim]
+                    newpath[i][dim] = newpath[i][dim] + \
+                        weight_data * (path[i][dim] - newpath[i][dim]) + \
+                        weight_smooth * (newpath[i+1][dim] + newpath[i-1][dim] - 2 * newpath[i][dim])
+                    totalChange += abs(oldVal - newpath[i][dim])
+        if totalChange < tolerance:
+            break
     return newpath # Leave this line for the grader!
 
 printpaths(path,smooth(path))
