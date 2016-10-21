@@ -166,13 +166,35 @@ def run(params, printflag = False):
     return err / float(N)
 
 
-def twiddle(tol = 0.2): #Make this tolerance bigger if you are timing out!
+def twiddle(tol = 0.00002): #Make this tolerance bigger if you are timing out!
 ############## ADD CODE BELOW ####################
             
-
-
     # -------------
     # Add code here
     # -------------
-    
-    return run(params)
+    p = [0.,0.,0.]
+    dp = [1.,1.,1.]
+
+    bestErr = run(p)
+    while sum(dp) > tol:
+        for i in range(3):
+            p[i] += dp[i]
+            err = run(p)
+            if err < bestErr:
+                bestErr = err
+                dp[i] *= 1.1
+                continue
+            p[i] -= 2*dp[i]
+            err = run(p)
+            if err < bestErr:
+                bestErr = err
+                dp[i] *= 1.1
+                continue
+            p[i] += dp[i]
+            dp[i] *= 0.9
+
+    print p, dp
+    return run(p)
+
+print run([0.,0.,0.])
+print twiddle()
