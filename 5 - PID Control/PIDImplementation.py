@@ -152,6 +152,16 @@ def run(param1, param2, param3):
     #
     # Enter code here
     #
+    prevY = myrobot.y
+    totalError = 0
+    for i in range(N):
+        steerAngle = -param1 * myrobot.y 
+        steerAngle += - param2 * (myrobot.y - prevY)
+        steerAngle += - param3 * totalError
+        prevY = myrobot.y
+        totalError += prevY
+        myrobot = myrobot.move(steerAngle, speed)
+        print myrobot   
 
 # Call your function with parameters of (0.2, 3.0, and 0.004)
 run(0.2, 3.0, 0.004)
