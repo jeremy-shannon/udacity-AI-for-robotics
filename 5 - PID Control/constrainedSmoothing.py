@@ -23,6 +23,29 @@ def smooth(path, fix, weight_data = 0.0, weight_smooth = 0.1, tolerance = 0.0000
     # Enter code here. 
     # The weight for each of the two new equations should be 0.5 * weight_smooth
     #
+    # Make a deep copy of path into newpath
+    from copy import deepcopy
+    newpath = deepcopy(path)
+
+    while True:
+        totalChange = 0.
+        for i in range(len(path)):
+            if not fix[i]:
+                for dim in range(len(path[i])):
+                    oldVal = newpath[i][dim]
+                    newpath[i][dim] = newpath[i][dim] + \
+                        weight_data * (path[i][dim] - newpath[i][dim]) + \
+                        weight_smooth * (newpath[(i+1)%len(path)][dim] + \
+                        newpath[(i-1)%len(path)][dim] - 2 * newpath[i][dim]) + \
+                        weight_smooth/2 * (2 * newpath[(i+1)%len(path)][dim] - \
+                        newpath[(i+2)%len(path)][dim] - newpath[i][dim]) + \
+                        weight_smooth/2 * (2 * newpath[(i-1)%len(path)][dim] - \
+                        newpath[(i-2)%len(path)][dim] - newpath[i][dim])
+                    totalChange += abs(oldVal - newpath[i][dim])
+        if totalChange < tolerance:
+            break
+    for line in newpath:
+        print line
     return newpath
 
 # --------------
