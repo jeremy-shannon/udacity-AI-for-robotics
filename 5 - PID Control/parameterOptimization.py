@@ -177,6 +177,7 @@ def twiddle(tol = 0.00002): #Make this tolerance bigger if you are timing out!
 
     bestErr = run(p)
     while sum(dp) > tol:
+        print p
         for i in range(3):
             p[i] += dp[i]
             err = run(p)
