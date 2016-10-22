@@ -143,6 +143,19 @@ class robot:
         # Add code here
         #
         #            
+        center1 = [radius, radius] #y,x
+        center2 = [radius, 3*radius]
+        if self.x > radius and self.x < 3*radius:
+            if self.y > radius:
+                cte = self.y - (2*radius)
+            else:
+                cte = -1.0 * self.y
+        else:
+            if self.x < 2*radius:
+                cte = ((self.x - center1[1])**2 + (self.y - center1[0])**2)**0.5 - radius
+            else:
+                cte = ((self.x - center2[1])**2 + (self.y - center2[0])**2)**0.5 - radius                
+
         return cte
     
 ############## ONLY ADD / MODIFY CODE ABOVE THIS LINE ####################
