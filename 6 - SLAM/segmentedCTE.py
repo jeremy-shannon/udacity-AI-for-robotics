@@ -490,8 +490,22 @@ def run(grid, goal, spath, params, printflag = False, speed = 0.1, timeout = 100
         estimate = filter.get_position()
 
         ### ENTER CODE HERE
-        
-
+        correctSegment = False
+        while not correctSegment:
+            if index < (len(spath)-1): #not past end of path
+				dy = spath[index+1][1] - spath[index][1]
+				dx = spath[index+1][0] - spath[index][0]
+				ry = estimate[1] - spath[index][1]
+				rx = estimate[0] - spath[index][0]
+				if dx == 0 and dy == 0:
+				    cte = 0
+				    break
+				u = (rx*dx + ry*dy)/(dx**2 + dy**2)
+				if u < 1:
+					correctSegment = True
+					cte = (ry*dx - rx*dy)/sqrt(dx**2 + dy**2)
+				else:
+				    index += 1
         # ----------------------------------------
 
 
