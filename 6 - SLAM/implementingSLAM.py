@@ -302,6 +302,8 @@ class matrix:
         # Backward step for inverse.
         for j in reversed(range(self.dimx)):
             tjj = self.value[j][j]
+            if tjj ==0:
+                print "tjj = 0 at j =",j
             S = sum([self.value[j][k]*res.value[j][k] for k in range(j+1, self.dimx)])
             res.value[j][j] = 1.0/ tjj**2 - S/ tjj
             for i in reversed(range(j)):
@@ -510,8 +512,8 @@ def slam(data, N, num_landmarks, motion_noise, measurement_noise):
     #
     #
     total = N + num_landmarks
-    mtc = 1/motion_noise  # motion confidence
-    msc = 1/measurement_noise  # measurement confidence
+    mtc = motion_noise  # motion confidence
+    msc = measurement_noise  # measurement confidence
     omegax = [[0.0 for row in range(total)] for col in range(total)]
     xix = [[0.0 for row in range(1)] for col in range(total)]
     omegay = [[0.0 for row in range(total)] for col in range(total)]
@@ -521,18 +523,44 @@ def slam(data, N, num_landmarks, motion_noise, measurement_noise):
     omegay[0][0] += 1. 
     xiy[0][0] += 50. 
     for locI in range(len(data)):
-        for measI in range(len(data[locI])-1):
-            lmI = data[locI][measI][0][0] + locI
-            msx = data[locI][measI][0][1]
-            msy = data[locI][measI][0][2]
+        for measI in range(len(data[locI][0])):
+            lmI = data[locI][0][measI][0] + N
+            msx = data[locI][0][measI][1] * msc
+            msy = data[locI][0][measI][2] * msc
             omegax[locI][locI] += msc
             omegax[lmI][lmI] += msc
             omegax[locI][lmI] += -msc
-            omegax[lmI][locI] += -msc
+            omegax[lmI][locI] += -msc            
+            omegay[locI][locI] += msc
+            omegay[lmI][lmI] += msc
+            omegay[locI][lmI] += -msc
+            omegay[lmI][locI] += -msc
             xix[locI][0] += -msx
-            xix[lmI][0] += msx
-    print omegax
-    print xix
+            xix[lmI][0] += msx            
+            xiy[locI][0] += -msy
+            xiy[lmI][0] += msy
+        dx = data[locI][1][0] * mtc
+        dy = data[locI][1][1] * mtc
+        omegax[locI][locI] += mtc
+        omegax[locI+1][locI+1] += mtc
+        omegax[locI+1][locI] += -mtc
+        omegax[locI][locI+1] += -mtc            
+        omegay[locI][locI] += mtc
+        omegay[locI+1][locI+1] += mtc
+        omegay[locI][locI+1] += -mtc
+        omegay[locI+1][locI] += -mtc
+        xix[locI][0] += -dx
+        xix[locI+1][0] += dx            
+        xiy[locI][0] += -dy
+        xiy[locI+1][0] += dy
+
+    mux = matrix(omegax).inverse() * matrix(xix)
+    muy = matrix(omegay).inverse() * matrix(xiy)
+    mu = []
+    for i in range(mux.dimx):
+        mu.append(mux.value[i])
+        mu.append(muy.value[i])
+    mu = matrix(mu)
     return mu # Make sure you return mu for grading!
         
 ############### ENTER YOUR CODE ABOVE HERE ###################
@@ -633,15 +661,13 @@ test_data2 = [[[[0, 26.543274387283322, -6.262538160312672], [3, 9.9373968257997
 
 ### Uncomment the following three lines for test case 1 ###
 
-#result = slam(test_data1, 20, 5, 2.0, 2.0)
-#print_result(20, 5, result)
+result = slam(test_data1, 20, 5, 2.0, 2.0)
+print_result(20, 5, result)
 #print result
 
 
 ### Uncomment the following three lines for test case 2 ###
 
-#result = slam(test_data2, 20, 5, 2.0, 2.0)
-#print_result(20, 5, result)
+result = slam(test_data2, 20, 5, 2.0, 2.0)
+print_result(20, 5, result)
 #print result
-
-
