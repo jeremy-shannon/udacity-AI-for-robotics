@@ -509,8 +509,30 @@ def slam(data, N, num_landmarks, motion_noise, measurement_noise):
     # Add your code here!
     #
     #
-    mu = [[0] for i in range(N + num_landmarks)]
-    print len(data)
+    total = N + num_landmarks
+    mtc = 1/motion_noise  # motion confidence
+    msc = 1/measurement_noise  # measurement confidence
+    omegax = [[0.0 for row in range(total)] for col in range(total)]
+    xix = [[0.0 for row in range(1)] for col in range(total)]
+    omegay = [[0.0 for row in range(total)] for col in range(total)]
+    xiy = [[0.0 for row in range(1)] for col in range(total)]
+    omegax[0][0] += 1.
+    xix[0][0] += 50. 
+    omegay[0][0] += 1. 
+    xiy[0][0] += 50. 
+    for locI in range(len(data)):
+        for measI in range(len(data[locI])-1):
+            lmI = data[locI][measI][0][0] + locI
+            msx = data[locI][measI][0][1]
+            msy = data[locI][measI][0][2]
+            omegax[locI][locI] += msc
+            omegax[lmI][lmI] += msc
+            omegax[locI][lmI] += -msc
+            omegax[lmI][locI] += -msc
+            xix[locI][0] += -msx
+            xix[lmI][0] += msx
+    print omegax
+    print xix
     return mu # Make sure you return mu for grading!
         
 ############### ENTER YOUR CODE ABOVE HERE ###################
