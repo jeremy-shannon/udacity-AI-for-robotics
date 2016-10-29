@@ -76,6 +76,50 @@ todo = [2, 1]
 # modify code below
 # ----------------------------------------
 def plan(warehouse, dropzone, todo):
+    directions = [[-1, 0], # Y,X clockwise starting at UP
+                  [-1, 1],
+                  [ 0, 1],
+                  [ 1, 1],
+                  [ 1, 0],
+                  [ 1,-1],
+                  [ 0,-1],
+                  [-1,-1]]
+    costs = [1, 1.5, 1, 1.5, 1, 1.5, 1, 1.5] # cost for each direction
+    cost = 0
+    while len(todo) > 0:
+        x0 = dropzone[1]    # start location
+        y0 = dropzone[0]
+        xN = 99             # target location
+        yN = 99
+        currentTarget = todo.pop(0)
+        for y in range(len(warehouse)):
+            for x in range(len(warehouse[0])):
+                if warehouse[y][x] == currentTarget:
+                    xN = x
+                    yN = y
+        # A*
+        h = [[99 for x in range(len(warehouse[0]))] for y in range(len(warehouse))]
+        change = True
+        while change:
+            change = False
+            for y in range(len(warehouse)):
+                for x in range(len(warehouse[0])):
+                    if y == yN and x == xN and h[y][x] == 99:
+                        print x,y
+                        h[y][x] = 0
+                        change = True
+                    if warehouse[y][x] == 0 or (x == x0 and y == y0):
+                        for dir in range(len(directions)):
+                            x1 = x + directions[dir][1]
+                            y1 = y + directions[dir][0]
+                            if x1 >= 0 and x1 < len(warehouse[0]) and y1 >= 0 and y1 < len(warehouse):
+                                c1 = h[y1][x1] + costs[dir]
+                                if c1 < h[y][x]:
+                                    h[y][x] = c1
+                                    change = True
+        
+        cost += 2*h[y0][x0]
+        warehouse[yN][xN] = 0
     
     return cost
     
@@ -155,4 +199,4 @@ testing_suite = [[warehouse1, warehouse2, warehouse3, warehouse4],
                  [true_cost1, true_cost2, true_cost3, true_cost4]]
 
 
-#solution_check(testing_suite) #UNCOMMENT THIS LINE TO TEST YOUR CODE
+solution_check(testing_suite) #UNCOMMENT THIS LINE TO TEST YOUR CODE
