@@ -48,7 +48,7 @@ def estimate_next_pos2(measurement, OTHER = None):
     y1 = measurement[1]
 
     if not OTHER:
-        OTHER = [[],[]]
+        OTHER = [[],[],[]]
         # inital state matrix (polar location and angular velocity)
         x = matrix([[0.], [0.], [0.], [0.], [0.], [0.]]) 
         # initial uncertainty: x, y, vx, vy, ax, ay 
@@ -63,8 +63,10 @@ def estimate_next_pos2(measurement, OTHER = None):
         x = OTHER[0]
         P = OTHER[1]
 
+    OTHER[2].append(measurement)
+
     # assume dt = 1
-    dt = 1.5
+    dt = 1.
     # external motion
     u = matrix([[0.], [0.], [0.], [0.], [0.], [0.]]) 
     # next state function: 
@@ -84,18 +86,18 @@ def estimate_next_pos2(measurement, OTHER = None):
     I =  matrix([[]])
     I.identity(6)
 
-
-    # prediction
-    x = (F * x) + u
-    P = F * P * F.transpose()
-    
-    # measurement update
-    Z = matrix([[x1,y1]])
-    y = Z.transpose() - (H * x)
-    S = H * P * H.transpose() + R
-    K = P * H.transpose() * S.inverse()
-    x = x + (K * y)
-    P = (I - (K * H)) * P
+    for i in range(len(OTHER[2])):
+        # prediction
+        x = (F * x) + u
+        P = F * P * F.transpose()
+        
+        # measurement update
+        Z = matrix([[OTHER[2][i][0],OTHER[2][i][1]]])
+        y = Z.transpose() - (H * x)
+        S = H * P * H.transpose() + R
+        K = P * H.transpose() * S.inverse()
+        x = x + (K * y)
+        P = (I - (K * H)) * P
     
     OTHER[0] = x
     OTHER[1] = P
@@ -117,13 +119,13 @@ def estimate_next_pos(measurement, OTHER = None):
     """Estimate the next (x, y) position of the wandering Traxbot
     based on noisy (x, y) measurements."""
 
-    print "meas:", measurement
+    #print "meas:", measurement
     
     x1 = measurement[0]
     y1 = measurement[1]
 
     if not OTHER:
-        OTHER = [[],[],[]]
+        OTHER = [[],[],[],[]]
         # inital guesses:
         x0 = 0. 
         y0 = 0.
@@ -131,68 +133,74 @@ def estimate_next_pos(measurement, OTHER = None):
         theta0 = 0.
         dtheta0 = 0.
         # initial uncertainty: 
-        P =  matrix([[1000.,0.,0.,0.,0.],
-                     [0.,1000.,0.,0.,0.],
-                     [0.,0.,1000.,0.,0.],
-                     [0.,0.,0.,1000.,0.],
-                     [0.,0.,0.,0.,1000.]])
+        P =  matrix([[1000.,0.,0.],
+                     [0.,1000.,0.],
+                     [0.,0.,1000.]])
     else:
         # pull previous measurement, state variables (x), and uncertainty (P) from OTHER
-        x0 = OTHER[0].value[0][0]
-        y0 = OTHER[0].value[1][0]
-        dist0 = OTHER[0].value[2][0]
-        theta0 = OTHER[0].value[3][0] % (2*pi)
-        dtheta0 = OTHER[0].value[4][0]
-        P = OTHER[1]
-  
+        lastMeasurement = OTHER[0][len(OTHER[0])-1]
+        x0 = lastMeasurement[0]
+        y0 = lastMeasurement[1]
+        dist0 = OTHER[1].value[0][0]
+        theta0 = OTHER[1].value[1][0] % (2*pi)
+        dtheta0 = OTHER[1].value[2][0]
+        P = OTHER[2]
+
+    # convert measurement to dist and theta (based on previous estimate)
+    dist = distance_between([x1,y1],[x0,y0])
+    theta = atan2(y1-y0,x1-x0)
+        
     # time step
     dt = 1.
         
     # state matrix (polar location and angular velocity)
-    x = matrix([[x0],[y0],[dist0],[theta0],[dtheta0]]) 
+    x = matrix([[dist0], [theta0], [dtheta0]]) 
     # external motion
-    u = matrix([[0.], [0.], [0.], [0.], [0.]]) 
+    u = matrix([[0.], [0.], [0.]]) 
     # next state function: 
-    F =  matrix([[1.,0.,sin(theta0+dtheta0),dist0*cos(theta0+dtheta0),dist0*cos(theta0+dtheta0)],
-                 [0.,1.,cos(theta0+dtheta0),-dist0*sin(theta0+dtheta0),-dist0*sin(theta0+dtheta0)],
-                 [0.,0.,1.,0.,0.],
-                 [0.,0.,0.,1.,dt],
-                 [0.,0.,0.,0.,1.]])
+    F =  matrix([[1.,0.,0.],
+                 [0.,1.,dt],  # theta is the only thing that should change, by dtheta
+                 [0.,0.,1.]])
     # measurement function: 
-    H =  matrix([[1.,0.,0.,0.,0.],
-                 [0.,1.,0.,0.,0.]])
+    H =  matrix([[1.,0.,0.],
+                 [0.,1.,0.]])
     # measurement uncertainty: 
-    R =  matrix([[.015,0.],
-                 [0.,.015]])
+    R =  matrix([[.05,0.],
+                 [0.,.05]])
     # 5d identity matrix
     I =  matrix([[]])
-    I.identity(5)
+    I.identity(3)
 
+    OTHER[3].append([dist,theta])
 
+    #for i in range(len(OTHER[3])):
     # prediction
     x = (F * x) + u
     P = F * P * F.transpose()
     
     # measurement update
-    Z = matrix([[x1,y1]])
+    #Z = matrix([[OTHER[3][i][0],OTHER[3][i][1]]])
+    Z = matrix([[dist,theta]])
     y = Z.transpose() - (H * x)
     S = H * P * H.transpose() + R
     K = P * H.transpose() * S.inverse()
     x = x + (K * y)
     P = (I - (K * H)) * P
     
-    OTHER[0] = x
-    OTHER[1] = P
+    OTHER[0].append(measurement)
+    OTHER[1] = x
+    OTHER[2] = P
     
     #print "x:"
     #x.show()
     #print "P:"
     #P.show()
     
-    xy_estimate = (x.value[0][0], x.value[1][0])
+    xy_estimate = (x1+x.value[0][0]*cos((x.value[1][0]+x.value[2][0])%(2*pi)),
+                   y1+x.value[0][0]*sin((x.value[1][0]+x.value[2][0])%(2*pi)))
     #xy_estimate = (x1+x.value[0][0]*cos((x.value[1][0])),
     #               y1+x.value[0][0]*sin((x.value[1][0])))
-    print xy_estimate
+    #print xy_estimate
     
     # You must return xy_estimate (x, y), and OTHER (even if it is None) 
     # in this order for grading purposes.

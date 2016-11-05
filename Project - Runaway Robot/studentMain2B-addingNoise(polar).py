@@ -117,19 +117,19 @@ def estimate_next_pos(measurement, OTHER = None):
     """Estimate the next (x, y) position of the wandering Traxbot
     based on noisy (x, y) measurements."""
 
-    print "meas:", measurement
+    #print "meas:", measurement
     
     x1 = measurement[0]
     y1 = measurement[1]
 
     if not OTHER:
-        OTHER = [[],[],[]]
+        OTHER = [[],[]]
         # inital guesses:
-        x0 = 0. 
+        x0 = 0.     # x0, y0 = center point
         y0 = 0.
-        dist0 = 0.
-        theta0 = 0.
-        dtheta0 = 0.
+        r = 0.
+        theta = 0.
+        dtheta = 0.
         # initial uncertainty: 
         P =  matrix([[1000.,0.,0.,0.,0.],
                      [0.,1000.,0.,0.,0.],
@@ -137,33 +137,43 @@ def estimate_next_pos(measurement, OTHER = None):
                      [0.,0.,0.,1000.,0.],
                      [0.,0.,0.,0.,1000.]])
     else:
-        # pull previous measurement, state variables (x), and uncertainty (P) from OTHER
+        # pull state variables (x) and uncertainty (P) from OTHER
         x0 = OTHER[0].value[0][0]
         y0 = OTHER[0].value[1][0]
-        dist0 = OTHER[0].value[2][0]
-        theta0 = OTHER[0].value[3][0] % (2*pi)
-        dtheta0 = OTHER[0].value[4][0]
+        r = OTHER[0].value[2][0]
+        theta = OTHER[0].value[3][0] % (2*pi)
+        dtheta = OTHER[0].value[4][0]
         P = OTHER[1]
-  
+
+    # convert measurement to polar coordinates (based on previous estimate)
+    x01 = x1 - r * cos((theta+dtheta)%(2*pi))
+    y01 = y1 - r * sin((theta+dtheta)%(2*pi))
+    r1 = distance_between([x1,y1],[x0,y0])
+    theta1 = atan2(y1-y0,x1-x0)
+        
     # time step
     dt = 1.
         
     # state matrix (polar location and angular velocity)
-    x = matrix([[x0],[y0],[dist0],[theta0],[dtheta0]]) 
+    x = matrix([[x0], [y0], [r], [theta], [dtheta]]) 
     # external motion
     u = matrix([[0.], [0.], [0.], [0.], [0.]]) 
     # next state function: 
-    F =  matrix([[1.,0.,sin(theta0+dtheta0),dist0*cos(theta0+dtheta0),dist0*cos(theta0+dtheta0)],
-                 [0.,1.,cos(theta0+dtheta0),-dist0*sin(theta0+dtheta0),-dist0*sin(theta0+dtheta0)],
+    F =  matrix([[1.,0.,0.,0.,0.],
+                 [0.,1.,0.,0.,0.],
                  [0.,0.,1.,0.,0.],
-                 [0.,0.,0.,1.,dt],
+                 [0.,0.,0.,1.,dt],  # theta is the only thing that should change, by dtheta
                  [0.,0.,0.,0.,1.]])
     # measurement function: 
     H =  matrix([[1.,0.,0.,0.,0.],
-                 [0.,1.,0.,0.,0.]])
+                 [0.,1.,0.,0.,0.],
+                 [0.,0.,1.,0.,0.],
+                 [0.,0.,0.,1.,0.]])
     # measurement uncertainty: 
-    R =  matrix([[.015,0.],
-                 [0.,.015]])
+    R =  matrix([[.015,0.,0.,0.],
+                 [0.,.015,0.,0.],
+                 [0.,0.,.015,0.],
+                 [0.,0.,0.,.015]])
     # 5d identity matrix
     I =  matrix([[]])
     I.identity(5)
@@ -174,7 +184,7 @@ def estimate_next_pos(measurement, OTHER = None):
     P = F * P * F.transpose()
     
     # measurement update
-    Z = matrix([[x1,y1]])
+    Z = matrix([[x01,y01,r1,theta1]])
     y = Z.transpose() - (H * x)
     S = H * P * H.transpose() + R
     K = P * H.transpose() * S.inverse()
@@ -189,9 +199,8 @@ def estimate_next_pos(measurement, OTHER = None):
     #print "P:"
     #P.show()
     
-    xy_estimate = (x.value[0][0], x.value[1][0])
-    #xy_estimate = (x1+x.value[0][0]*cos((x.value[1][0])),
-    #               y1+x.value[0][0]*sin((x.value[1][0])))
+    xy_estimate = (x.value[0][0]+x.value[2][0]*cos((x.value[3][0]+x.value[4][0])%(2*pi)),
+                   x.value[1][0]+x.value[2][0]*sin((x.value[3][0]+x.value[4][0])%(2*pi)))
     print xy_estimate
     
     # You must return xy_estimate (x, y), and OTHER (even if it is None) 
