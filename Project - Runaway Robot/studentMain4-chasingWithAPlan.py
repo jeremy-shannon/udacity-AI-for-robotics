@@ -1,9 +1,9 @@
 # ----------
-# Part Five
+# Part Four
 #
-# This time, the sensor measurements from the runaway Traxbot will be VERY 
-# noisy (about twice the target's stepsize). You will use this noisy stream
-# of measurements to localize and catch the target.
+# Again, you'll track down and recover the runaway Traxbot. 
+# But this time, your speed will be about the same as the runaway bot. 
+# This may require more careful planning than you used last time.
 #
 # ----------
 # YOUR JOB
@@ -13,7 +13,7 @@
 # ----------
 # GRADING
 # 
-# Same as part 3 and 4. Again, try to catch the target in as few steps as possible.
+# Same as part 3. Again, try to catch the target in as few steps as possible.
 
 from robot import *
 from math import *
@@ -310,7 +310,7 @@ def naive_next_move(hunter_position, hunter_heading, target_measurement, max_dis
     return turning, distance, OTHER
 
 target = robot(0.0, 10.0, 0.0, 2*pi / 30, 1.5)
-measurement_noise = 2.0*target.distance # VERY NOISY!!
+measurement_noise = .05*target.distance
 target.set_noise(0.0, 0.0, measurement_noise)
 
 hunter = robot(-10.0, -10.0, 0.0)
