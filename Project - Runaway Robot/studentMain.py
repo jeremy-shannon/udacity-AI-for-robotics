@@ -158,8 +158,8 @@ def estimate_next_pos(measurement, OTHER = None):
     H =  matrix([[1.,0.,0.,0.,0.],
                  [0.,1.,0.,0.,0.]])
     # measurement uncertainty: 
-    R =  matrix([[.075,0.],
-                 [0.,.075]])
+    R =  matrix([[measurement_noise,0.],
+                 [0.,measurement_noise]])
     # 5d identity matrix
     I =  matrix([[]])
     I.identity(5)
