@@ -152,26 +152,18 @@ def estimate_next_pos(measurement, OTHER = None):
     x = matrix([[x0],[y0],[dist0],[theta0],[dtheta0]]) 
     # external motion
     u = matrix([[0.], [0.], [0.], [0.], [0.]]) 
-    # next state function: 
-    F =  matrix([[1.,0.,sin(theta0+dtheta0),dist0*cos(theta0+dtheta0),dist0*cos(theta0+dtheta0)],
-                 [0.,1.,cos(theta0+dtheta0),-dist0*sin(theta0+dtheta0),-dist0*sin(theta0+dtheta0)],
-                 [0.,0.,1.,0.,0.],
-                 [0.,0.,0.,1.,dt],
-                 [0.,0.,0.,0.,1.]])
+
     # measurement function: 
+    # for the EKF this should be the Jacobian of H, but in this case it turns out to be the same (?)
     H =  matrix([[1.,0.,0.,0.,0.],
                  [0.,1.,0.,0.,0.]])
     # measurement uncertainty: 
-    R =  matrix([[.015,0.],
-                 [0.,.015]])
+    R =  matrix([[.075,0.],
+                 [0.,.075]])
     # 5d identity matrix
     I =  matrix([[]])
     I.identity(5)
 
-
-    # prediction
-    x = (F * x) + u
-    P = F * P * F.transpose()
     
     # measurement update
     Z = matrix([[x1,y1]])
@@ -181,6 +173,35 @@ def estimate_next_pos(measurement, OTHER = None):
     x = x + (K * y)
     P = (I - (K * H)) * P
     
+    # pull out current estimates based on measurement
+    # this was a big part of what was hainging me up (I was using older estimates before)
+    x0 = x.value[0][0]
+    y0 = x.value[1][0]
+    dist0 = x.value[2][0]
+    theta0 = x.value[3][0]
+    dtheta0 = x.value[4][0]
+
+    # next state function: 
+    # this is now the Jacobian of the transition matrix (F) from the regular Kalman Filter
+    A =  matrix([[1.,0.,cos(theta0+dtheta0),-dist0*sin(theta0+dtheta0),-dist0*sin(theta0+dtheta0)],
+                 [0.,1.,sin(theta0+dtheta0),dist0*cos(theta0+dtheta0),dist0*cos(theta0+dtheta0)],
+                 [0.,0.,1.,0.,0.],
+                 [0.,0.,0.,1.,dt],
+                 [0.,0.,0.,0.,1.]])
+
+    # calculate new estimate 
+    # it's NOT simply the matrix multiplication of transition matrix and estimated state vector
+    # for the EKF just use the state transition formulas the transition matrix was built from
+    x = matrix([[x0 + dist0 * cos(theta0 + dtheta0)],
+                [y0 + dist0 * sin(theta0 + dtheta0)],
+                [dist0],
+                [theta0 + dtheta0],
+                [dtheta0]])
+
+    # prediction
+    # x = (F * x) + u
+    P = A * P * A.transpose()
+
     OTHER[0] = x
     OTHER[1] = P
     
@@ -302,8 +323,8 @@ def demo_grading_visual(estimate_next_pos_fcn, target_bot, OTHER = None):
 test_target = robot(2.1, 4.3, 0.5, 2*pi / 34.0, 1.5)
 measurement_noise = 0.05 * test_target.distance
 test_target.set_noise(0.0, 0.0, measurement_noise)
-
-demo_grading_visual(estimate_next_pos, test_target)
+print "measurement_noise:" , measurement_noise
+demo_grading(estimate_next_pos, test_target)
 
 
 

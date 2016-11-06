@@ -183,7 +183,7 @@ def distance_between(point1, point2):
 # This is here to give you a sense for how we will be running and grading
 # your code. Note that the OTHER variable allows you to store any 
 # information that you want. 
-"""
+
 def demo_grading(estimate_next_pos_fcn, target_bot, OTHER = None):
     localized = False
     distance_tolerance = 0.01 * target_bot.distance
@@ -204,10 +204,10 @@ def demo_grading(estimate_next_pos_fcn, target_bot, OTHER = None):
         if ctr == 1000:
             print "Sorry, it took you too many steps to localize the target."
     return localized
-"""
 
 
-def demo_grading(estimate_next_pos_fcn, target_bot, OTHER=None):
+
+def demo_grading_vis(estimate_next_pos_fcn, target_bot, OTHER=None):
     localized = False
     distance_tolerance = 0.01 * target_bot.distance
     ctr = 0
