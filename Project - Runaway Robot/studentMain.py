@@ -131,14 +131,11 @@ def next_move(hunter_position, hunter_heading, target_measurement, max_distance,
         i += 1
         target = (target[0] + dist0*cos(theta+dtheta0), target[1] + dist0*sin(theta+dtheta0))
         theta = (theta + dtheta0) % (2*pi)
-        if i % 100 == 0:
-            print "i, target, theta:", i, target, theta
         if i < 10000:
             break   
     i += 1
     target = (target[0] + dist0*cos(theta+dtheta0), target[1] + dist0*sin(theta+dtheta0))
     theta = (theta + dtheta0) % (2*pi)
-    print "i, target, theta:", i, target, theta
     distance = distance_between(hunter_position, target)
     if distance > max_distance:
         distance = max_distance
@@ -310,7 +307,7 @@ def naive_next_move(hunter_position, hunter_heading, target_measurement, max_dis
     return turning, distance, OTHER
 
 target = robot(0.0, 10.0, 0.0, 2*pi / 30, 1.5)
-measurement_noise = 2.0*target.distance # VERY NOISY!!
+measurement_noise = 1.*target.distance # VERY NOISY!!
 target.set_noise(0.0, 0.0, measurement_noise)
 
 hunter = robot(-10.0, -10.0, 0.0)

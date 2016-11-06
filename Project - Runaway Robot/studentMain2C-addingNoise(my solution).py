@@ -321,7 +321,7 @@ def demo_grading_visual(estimate_next_pos_fcn, target_bot, OTHER = None):
 # This is how we create a target bot. Check the robot.py file to understand
 # How the robot class behaves.
 test_target = robot(2.1, 4.3, 0.5, 2*pi / 34.0, 1.5)
-measurement_noise = 0.05 * test_target.distance
+measurement_noise = 2.0 * test_target.distance
 test_target.set_noise(0.0, 0.0, measurement_noise)
 print "measurement_noise:" , measurement_noise
 demo_grading(estimate_next_pos, test_target)
