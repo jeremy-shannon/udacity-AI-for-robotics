@@ -33,7 +33,7 @@ def next_move(hunter_position, hunter_heading, target_measurement, max_distance,
     y1 = measurement[1]
 
     if not OTHER:
-        OTHER = [[],[],[]]
+        OTHER = [[],[],[],[]]
         # inital guesses:
         x0 = 0. 
         y0 = 0.
@@ -127,24 +127,31 @@ def next_move(hunter_position, hunter_heading, target_measurement, max_distance,
     target = xy_estimate
     theta = theta0
     i = 1
-    while (distance_between(hunter_position, target) > max_distance*i):
+    if not OTHER[3]:
+        previous_i = 0
+    else:
+        previous_i = OTHER[3]
+    distRatio = 1
+    if dist0 != 0:
+        distRatio = max_distance/dist0
+    print "distratio:", distRatio
+    while (distance_between(hunter_position, target) > distRatio*max_distance*i and i <= previous_i+1):
         i += 1
         target = (target[0] + dist0*cos(theta+dtheta0), target[1] + dist0*sin(theta+dtheta0))
-        theta = (theta + dtheta0) % (2*pi)
-        if i % 100 == 0:
-            print "i, target, theta:", i, target, theta
-        if i < 10000:
-            break   
-    i += 1
-    target = (target[0] + dist0*cos(theta+dtheta0), target[1] + dist0*sin(theta+dtheta0))
-    theta = (theta + dtheta0) % (2*pi)
-    print "i, target, theta:", i, target, theta
+        theta = angle_trunc(theta + dtheta0)
+        if i > 1000:
+            print "impossible"
+            break
+    print "i, target:", i, target
+    OTHER[3] = i
+    # target = (target[0] + dist0*cos(theta+dtheta0), target[1] + dist0*sin(theta+dtheta0))
+    # theta = angle_trunc(theta + dtheta0)
     distance = distance_between(hunter_position, target)
     if distance > max_distance:
         distance = max_distance
     diff_heading = get_heading(hunter_position, target)
     
-    turning = diff_heading - hunter_heading
+    turning = angle_trunc(diff_heading - hunter_heading)
     return turning, distance, OTHER
 
 def distance_between(point1, point2):
@@ -157,7 +164,7 @@ def demo_grading(hunter_bot, target_bot, next_move_fcn, OTHER = None):
     """Returns True if your next_move_fcn successfully guides the hunter_bot
     to the target_bot. This function is here to help you understand how we 
     will grade your submission."""
-    max_distance = 0.98 * target_bot.distance # 0.98 is an example. It will change.
+    max_distance = 0.3 * target_bot.distance # 0.98 is an example. It will change.
     separation_tolerance = 0.02 * target_bot.distance # hunter must be within 0.02 step size to catch target
     caught = False
     ctr = 0
@@ -198,7 +205,7 @@ def demo_grading_vis(hunter_bot, target_bot, next_move_fcn, OTHER = None):
     """Returns True if your next_move_fcn successfully guides the hunter_bot
     to the target_bot. This function is here to help you understand how we 
     will grade your submission."""
-    max_distance = 0.98 * target_bot.distance # 0.98 is an example. It will change.
+    max_distance = 0.7 * target_bot.distance # 0.98 is an example. It will change.
     separation_tolerance = 0.02 * target_bot.distance # hunter must be within 0.02 step size to catch target
     caught = False
     ctr = 0
@@ -216,7 +223,7 @@ def demo_grading_vis(hunter_bot, target_bot, next_move_fcn, OTHER = None):
     broken_robot.color('green')
     broken_robot.resizemode('user')
     broken_robot.shapesize(0.3, 0.3, 0.3)
-    size_multiplier = 15.0 #change size of animation
+    size_multiplier = .5 #change size of animation
     chaser_robot.hideturtle()
     chaser_robot.penup()
     chaser_robot.goto(hunter_bot.x*size_multiplier, hunter_bot.y*size_multiplier-100)
@@ -309,7 +316,7 @@ def naive_next_move(hunter_position, hunter_heading, target_measurement, max_dis
     distance = max_distance # full speed ahead!
     return turning, distance, OTHER
 
-target = robot(0.0, 10.0, 0.0, 2*pi / 30, 1.5)
+target = robot(0.0, 0.0, 0.0, 2*pi / 150, 15.5)
 measurement_noise = .05*target.distance
 target.set_noise(0.0, 0.0, measurement_noise)
 
